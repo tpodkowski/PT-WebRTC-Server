@@ -1,25 +1,28 @@
-import express from 'express';
-import http from 'http';
-import WebSocket from 'ws';
+const app = require('express')();
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
+const port = process.env.PORT || 3000;
 
-const app = express();
-const server = http.createServer(app);
-app.use(express.static('public'))
-
-const wss = new WebSocket.Server({
-  server
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/index.html');
 });
 
-wss.on('connection', (ws) => {
-  ws.on('message', (message) => {
+let history = [];
 
-    console.log('received: %s', message);
-    ws.send(`Hello, you sent -> ${message}`);
+io.on('connection', (socket) => {
+  io.emit('chat:message', history);
+
+  socket.on('chat:message', (msg) => {
+    history.push({
+      message: msg,
+      date: new Date()
+    });
+    history = history.splice(-100);
+
+    io.emit('chat:message', history);
   });
-
-  ws.send('Hi there, I am a WebSocket server');
 });
 
-server.listen(3000, () => {
-  console.log(`Server started on port ${server.address().port} :)`);
-});
+http.listen(port, () => {
+  console.log('listening on *:' + port);
+})
