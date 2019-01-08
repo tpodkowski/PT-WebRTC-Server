@@ -21,6 +21,10 @@ io.on('connection', (socket) => {
 
     io.emit('chat:message', history);
   });
+
+  socket.on('chat:typing', (data) => {
+    io.emit('chat:typing', data);
+  });
 });
 
 http.listen(port, () => {
