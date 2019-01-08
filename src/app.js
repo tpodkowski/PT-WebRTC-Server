@@ -3,7 +3,7 @@ const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const app = express();
 
-app.use(express.static('public'));
+app.use(express.static(__dirname + '/public'));
 
 let history = [];
 
